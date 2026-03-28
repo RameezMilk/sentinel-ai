@@ -1,0 +1,56 @@
+{
+  "name": "sentinelai",
+  "displayName": "SentinelAI",
+  "description": "Runtime governance layer for GitHub Copilot",
+  "version": "0.1.0",
+  "engines": { "vscode": "^1.99.0" },
+  "categories": ["AI", "Other"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "chatParticipants": [
+      {
+        "id": "sentinelai.guard",
+        "name": "sentinelai-guard",
+        "description": "SentinelAI governance layer — screens every request before Copilot responds",
+        "isSticky": true
+      }
+    ],
+    "configuration": {
+      "title": "SentinelAI",
+      "properties": {
+        "sentinelai.verifierPort": {
+          "type": "number",
+          "default": 8000,
+          "description": "Port the Python verifier API listens on"
+        },
+        "sentinelai.geminiApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "Gemini API key for RISKS.md policy auditing"
+        },
+        "sentinelai.risksPath": {
+          "type": "string",
+          "default": "${workspaceFolder}/RISKS.md",
+          "description": "Path to the governance policy file"
+        }
+      }
+    }
+  },
+  "dependencies": {
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.99.0",
+    "@types/node": "latest",
+    "@types/uuid": "^9.0.0",
+    "typescript": "^5.0.0",
+    "@vscode/vsce": "latest",
+    "esbuild": "^0.20.0"
+  },
+  "scripts": {
+    "compile": "tsc -p tsconfig.json",
+    "build": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node",
+    "package": "npx vsce package"
+  }
+}
