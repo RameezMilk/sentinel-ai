@@ -1,0 +1,20 @@
+{
+  "name": "sentinelai-mcp-gateway",
+  "version": "1.0.0",
+  "description": "SentinelAI MCP Gateway — runtime governance layer for GitHub Copilot",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "latest",
+    "zod": "^3.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "latest"
+  }
+}
