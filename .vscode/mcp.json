@@ -1,0 +1,9 @@
+{
+  "servers": {
+    "sentinelai": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["./mcp-gateway/dist/index.js"]
+    }
+  }
+}
