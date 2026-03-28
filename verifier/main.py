@@ -26,7 +26,10 @@ from scanner import scan
 from auditor import audit_commands, check_intent as audit_intent
 from logger import log_event
 
-logging.basicConfig(level=logging.WARNING, stream=sys.stderr)
+logging.basicConfig(
+    level=os.environ.get("LOG_LEVEL", "DEBUG").upper(),
+    stream=sys.stderr,
+)
 logger = logging.getLogger(__name__)
 
 app = FastAPI(title="SentinelAI Verifier")

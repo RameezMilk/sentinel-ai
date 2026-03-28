@@ -27,7 +27,7 @@ export class VerifierProcess {
 
     this.proc = spawn(uvicorn, ["main:app", "--port", "8000", "--log-level", "warning"], {
       cwd: verifierDir,
-      env: { ...process.env, RISKS_MD_PATH: risksPath },
+      env: { ...process.env, RISKS_MD_PATH: risksPath, LOG_LEVEL: process.env.LOG_LEVEL ?? "INFO" },
     });
 
     this.proc.stderr?.on("data", (data: Buffer) => {

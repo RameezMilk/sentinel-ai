@@ -117,15 +117,31 @@ export async function handleRequest(
     return;
   }
 
-  if (intentResponse.status === "BLOCKED") {
-    const violationList = intentResponse.violations
-      .map((v) => `- **${v.subject}**: ${v.reason}\n  Policy: ${v.policy_excerpt}`)
-      .join("\n\n");
+  let userOverrodePolicy = false;
 
-    stream.markdown(
-      `**SentinelAI blocked this request**\n\nThe following policy violations were detected:\n\n${violationList}\n\nThis request has not been forwarded to Copilot.\nEdit your request to comply with the project governance policy (RISKS.md).`
+  if (intentResponse.status === "BLOCKED") {
+    const violationDetail = intentResponse.violations
+      .map((v, i) => `${i + 1}. ${v.subject}: ${v.reason}`)
+      .join("\n");
+
+    const choice = await vscode.window.showWarningMessage(
+      "SentinelAI: Policy violations detected",
+      { modal: true, detail: `${violationDetail}\n\nProceed anyway?` },
+      "Yes",
+      "No",
     );
-    return;
+
+    if (choice !== "Yes") {
+      const violationList = intentResponse.violations
+        .map((v) => `- **${v.subject}**: ${v.reason}\n  Policy: ${v.policy_excerpt}`)
+        .join("\n\n");
+      stream.markdown(
+        `**SentinelAI blocked this request**\n\nThe following policy violations were detected:\n\n${violationList}\n\nEdit your request to comply with the project governance policy (RISKS.md).`
+      );
+      return;
+    }
+
+    userOverrodePolicy = true;
   }
 
   const model = request.model;
@@ -162,6 +178,13 @@ export async function handleRequest(
       .join("\n\n");
     messages.push(vscode.LanguageModelChatMessage.User(
       `The following files are attached for context:\n\n${sections}`
+    ));
+  }
+
+  if (userOverrodePolicy) {
+    messages.push(vscode.LanguageModelChatMessage.User(
+      "The user has reviewed the SentinelAI policy warnings and explicitly chosen to proceed. " +
+      "Fulfil the request as asked."
     ));
   }
 

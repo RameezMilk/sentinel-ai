@@ -20,6 +20,20 @@ def _load_risks_md() -> str:
         return ""
 
 
+def _log_gemini_call(fn: str, prompt: str, response: genai.types.GenerateContentResponse) -> None:
+    logger.debug("[%s] prompt:\n%s", fn, prompt)
+    logger.debug("[%s] response:\n%s", fn, response.text)
+    usage = getattr(response, "usage_metadata", None)
+    if usage:
+        logger.info(
+            "[%s] tokens — prompt: %s  output: %s  total: %s",
+            fn,
+            getattr(usage, "prompt_token_count", "?"),
+            getattr(usage, "candidates_token_count", "?"),
+            getattr(usage, "total_token_count", "?"),
+        )
+
+
 def _get_client() -> Optional[genai.GenerativeModel]:
     api_key = os.environ.get("GEMINI_API_KEY", "")
     if not api_key:
@@ -55,6 +69,7 @@ Do not include markdown fences."""
 
     try:
         response = model.generate_content(prompt)
+        _log_gemini_call("audit_commands", prompt, response)
         import json
         items = json.loads(response.text.strip())
         return [
@@ -95,6 +110,7 @@ Do not include markdown fences."""
 
     try:
         response = model.generate_content(prompt)
+        _log_gemini_call("check_intent", prompt, response)
         import json
         items = json.loads(response.text.strip())
         return [
