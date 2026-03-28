@@ -2,7 +2,6 @@ import * as vscode from "vscode";
 import * as fs from "fs";
 import * as path from "path";
 import { VerifierProcess } from "./verifier-process.js";
-import { registerFileGuard } from "./file-guard.js";
 import { handleRequest } from "./guardian.js";
 
 const verifierProcess = new VerifierProcess();
@@ -40,7 +39,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   const participant = vscode.chat.createChatParticipant("sentinelai.guard", handleRequest);
   participant.iconPath = new vscode.ThemeIcon("shield");
   context.subscriptions.push(participant);
-  registerFileGuard(context);
 
   // Try immediately if a workspace is already open
   tryStartVerifier(vscode.workspace.workspaceFolders);

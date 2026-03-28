@@ -30,3 +30,6 @@ vscode-extension/*.js.map
 # OS
 .DS_Store
 Thumbs.db
+
+# ignore temporary files
+tests/
