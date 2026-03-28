@@ -1,7 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import * as http from "http";
-import * as https from "https";
 import { exec } from "child_process";
 import { promisify } from "util";
 import { randomUUID } from "crypto";
@@ -10,27 +9,6 @@ import { promptUserSingle, promptUserChecklist } from "./prompter.js";
 const execAsync = promisify(exec);
 const pending = new Map();
 const riskIdToCommand = new Map(); // "requestId:riskId" → command
-function postJson(url, data) {
-    const body = JSON.stringify(data);
-    const urlObj = new URL(url);
-    const lib = urlObj.protocol === "https:" ? https : http;
-    const options = {
-        hostname: urlObj.hostname,
-        port: parseInt(urlObj.port || (urlObj.protocol === "https:" ? "443" : "80")),
-        path: urlObj.pathname,
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Content-Length": Buffer.byteLength(body),
-        },
-    };
-    const req = lib.request(options, () => { });
-    req.on("error", (err) => {
-        process.stderr.write(`[gateway] POST ${url} failed: ${err.message}\n`);
-    });
-    req.write(body);
-    req.end();
-}
 function callVerifier(id, commands, trace) {
     const body = JSON.stringify({ id, commands, trace });
     const options = {
@@ -116,8 +94,12 @@ export function handleOverride(payload) {
             riskIdToCommand.delete(key);
     }
 }
-export function startLocalHttpServer() {
-    const server = http.createServer((req, res) => {
+let activeGatewayPort = 0;
+export function getActivePort() {
+    return activeGatewayPort;
+}
+function createRequestHandler() {
+    return (req, res) => {
         if (req.method !== "POST") {
             res.writeHead(405);
             res.end();
@@ -148,9 +130,33 @@ export function startLocalHttpServer() {
                 res.end();
             }
         });
-    });
-    server.listen(8001, () => {
-        process.stderr.write("[gateway] Local HTTP server listening on port 8001\n");
+    };
+}
+export function startLocalHttpServer() {
+    return new Promise((resolve, reject) => {
+        const startPort = parseInt(process.env.GATEWAY_PORT ?? "8090", 10);
+        const tryListen = (port) => {
+            if (port > startPort + 20) {
+                reject(new Error("No free port found in range"));
+                return;
+            }
+            const server = http.createServer(createRequestHandler());
+            server.once("error", (err) => {
+                if (err.code === "EADDRINUSE") {
+                    process.stderr.write(`[gateway] Port ${port} in use, trying ${port + 1}...\n`);
+                    tryListen(port + 1);
+                }
+                else {
+                    reject(err);
+                }
+            });
+            server.listen(port, () => {
+                activeGatewayPort = port;
+                process.stderr.write(`[gateway] Local HTTP server listening on port ${port}\n`);
+                resolve();
+            });
+        };
+        tryListen(startPort);
     });
 }
 export function createMcpServer() {
@@ -202,7 +208,8 @@ export function createMcpServer() {
     return server;
 }
 export async function startGateway() {
-    startLocalHttpServer();
+    await startLocalHttpServer();
+    process.stderr.write(`[gateway] Tip: set GATEWAY_CALLBACK_URL=http://localhost:${activeGatewayPort}/sentinel/verify-result in verifier/.env\n`);
     const server = createMcpServer();
     const transport = new StdioServerTransport();
     await server.connect(transport);

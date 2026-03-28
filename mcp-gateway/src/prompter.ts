@@ -1,12 +1,13 @@
 import * as readline from "readline";
 import * as http from "http";
 import { Risk } from "./types.js";
+import { getActivePort } from "./gateway.js";
 
 function postOverride(id: string, approvedRiskIds: string[]): void {
   const body = JSON.stringify({ id, approvedRiskIds });
   const options = {
     hostname: "localhost",
-    port: 8001,
+    port: getActivePort(),
     path: "/sentinel/override",
     method: "POST",
     headers: {

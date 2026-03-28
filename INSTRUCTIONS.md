@@ -85,7 +85,46 @@ Then in VS Code:
 
 ## Step 5 — Test the pipeline
 
-Send a test request to the verifier from any terminal:
+There are two ways to test SentinelAI. They exercise different parts of the stack.
+
+---
+
+### Option A — Copilot Agent via MCP Gateway (full pipeline)
+
+This is the intended production path. Commands flow from Copilot → MCP gateway → verifier. The gateway intercepts risky commands and prompts for human approval before anything is executed.
+
+1. Open **GitHub Copilot Chat** (`Ctrl+Alt+I`)
+2. Switch to **Agent mode** using the dropdown next to the input box
+3. Send a message that asks Copilot to run a command, for example:
+
+   **Safe command:**
+   ```
+   Use the sentinelai tool to verify this command: echo hello
+   ```
+   Expected: Copilot calls the MCP tool, verifier returns `VALIDATED`, no prompt appears in the gateway terminal.
+
+   **Risky command:**
+   ```
+   Use the sentinelai tool to verify this command: rm -rf /tmp/test
+   ```
+   Expected: Copilot calls the MCP tool, verifier returns `SINGLE_RISK`, and the **gateway terminal** shows:
+
+   ```
+   ⚠  RISK DETECTED
+      Command : rm -rf /tmp/test
+      Reason  : Recursive force delete
+      Source  : regex
+
+      Proceed? (y/n):
+   ```
+
+   Switch to the gateway terminal and type `y` to approve or `n` to deny. Copilot receives the result and continues.
+
+---
+
+### Option B — curl direct to verifier (bypass gateway, for debugging)
+
+This calls the verifier API directly, skipping the MCP gateway and the human-approval step entirely. Use this to confirm the verifier is running and classifying commands correctly, independent of Copilot or the gateway.
 
 ```bash
 # Safe command — should return VALIDATED
@@ -93,24 +132,13 @@ curl -X POST http://localhost:8000/verify \
   -H "Content-Type: application/json" \
   -d '{"id":"test-001","commands":["echo hello"],"trace":"just printing hello"}'
 
-# Risky command — should trigger a terminal prompt in the gateway window
+# Risky command — should return SINGLE_RISK (no terminal prompt — gateway is bypassed)
 curl -X POST http://localhost:8000/verify \
   -H "Content-Type: application/json" \
   -d '{"id":"test-002","commands":["rm -rf /tmp/test"],"trace":"cleaning temp files"}'
 ```
 
-For the risky command, switch to the gateway terminal — you will see:
-
-```
-⚠  RISK DETECTED
-   Command : rm -rf /tmp/test
-   Reason  : Recursive force delete
-   Source  : regex
-
-   Proceed? (y/n):
-```
-
-Type `y` to approve or `n` to deny.
+Note: with curl you will see the risk JSON response, but **no approval prompt** appears because the gateway is not in the path.
 
 ---
 
@@ -171,3 +199,4 @@ Press `Ctrl+C` in each terminal to stop the gateway and verifier.
 | `npm run build` fails | Run `npm install` first inside `mcp-gateway/` |
 | `ModuleNotFoundError` in Python | Run `pip install -r requirements.txt` inside `verifier/` |
 | Copilot not using SentinelAI | Verify `.vscode/mcp.json` exists and reload VS Code |
+| curl returns risk but no approval prompt | Expected — curl bypasses the gateway; use Copilot agent for the full pipeline |

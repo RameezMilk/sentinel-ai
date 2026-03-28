@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 app = FastAPI(title="SentinelAI Verifier")
 
 GATEWAY_CALLBACK_URL = os.environ.get(
-    "GATEWAY_CALLBACK_URL", "http://localhost:8001/sentinel/verify-result"
+    "GATEWAY_CALLBACK_URL", "http://localhost:8080/sentinel/verify-result"
 )
 AGENT_ID = os.environ.get("AGENT_ID", "copilot-default")
 
