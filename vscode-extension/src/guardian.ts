@@ -50,6 +50,41 @@ interface EditFileInput {
   newContent: string;
 }
 
+interface FileContext {
+  path: string;
+  content: string;
+}
+
+async function resolveReferences(references: readonly vscode.ChatPromptReference[]): Promise<FileContext[]> {
+  const contexts: FileContext[] = [];
+
+  for (const ref of references) {
+    let uri: vscode.Uri | undefined;
+    let range: vscode.Range | undefined;
+
+    if (ref.value instanceof vscode.Uri) {
+      uri = ref.value;
+    } else if (ref.value instanceof vscode.Location) {
+      uri = ref.value.uri;
+      range = ref.value.range;
+    }
+
+    if (!uri) {
+      continue;
+    }
+
+    try {
+      const doc = await vscode.workspace.openTextDocument(uri);
+      const content = range ? doc.getText(range) : doc.getText();
+      contexts.push({ path: vscode.workspace.asRelativePath(uri), content });
+    } catch {
+      // Reference points to an unreadable resource — skip silently
+    }
+  }
+
+  return contexts;
+}
+
 async function applyFileEdit(workspaceRoot: vscode.Uri, filePath: string, newContent: string): Promise<void> {
   const uri = vscode.Uri.joinPath(workspaceRoot, filePath);
   const edit = new vscode.WorkspaceEdit();
@@ -93,12 +128,7 @@ export async function handleRequest(
     return;
   }
 
-  // status === "APPROVED" — forward to Copilot
-  const [model] = await vscode.lm.selectChatModels({ vendor: "copilot", family: "gpt-4o" });
-  if (!model) {
-    stream.markdown("**SentinelAI**: No Copilot model available. Ensure GitHub Copilot is installed and signed in.");
-    return;
-  }
+  const model = request.model;
 
   const messages: vscode.LanguageModelChatMessage[] = [
     vscode.LanguageModelChatMessage.User(
@@ -122,6 +152,17 @@ export async function handleRequest(
         messages.push(vscode.LanguageModelChatMessage.Assistant(text));
       }
     }
+  }
+
+  // Resolve #-attached files and selections, inject their content before the user prompt
+  const fileContexts = await resolveReferences(request.references);
+  if (fileContexts.length > 0) {
+    const sections = fileContexts
+      .map(({ path, content }) => `--- ${path} ---\n${content}`)
+      .join("\n\n");
+    messages.push(vscode.LanguageModelChatMessage.User(
+      `The following files are attached for context:\n\n${sections}`
+    ));
   }
 
   messages.push(vscode.LanguageModelChatMessage.User(request.prompt));
@@ -176,7 +217,6 @@ export async function handleRequest(
       break;
     }
 
-    // Feed the tool results back so the model can continue reasoning
     messages.push(vscode.LanguageModelChatMessage.Assistant(assistantParts));
     messages.push(vscode.LanguageModelChatMessage.User(toolResults));
   }
