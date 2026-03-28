@@ -5,6 +5,9 @@ import sys
 from datetime import datetime, timezone
 from uuid import uuid4
 
+from dotenv import load_dotenv
+load_dotenv()
+
 import httpx
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse

@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+
+# Build output
+mcp-gateway/dist/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Solana keypair (never commit private keys)
+*.json
+!package.json
+!tsconfig.json
+!mcp-gateway/package.json
+
+# Python packaging
+*.egg-info/
+dist/
+build/
+*.whl
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# TypeScript
+*.tsbuildinfo
