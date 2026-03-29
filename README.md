@@ -3,7 +3,6 @@
 Sentinel AI is a runtime observability and interception layer for AI coding assistants. It intercepts, validates, and audits every AI-generated action in real time, screening prompts and file saves against a customisable governance policy, blocking dangerous commands, and writing every decision immutably to the Solana blockchain.
 
 ![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)
-![React](https://img.shields.io/badge/React-18+-61DAFB?logo=react&logoColor=fff)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5+-3178C6?logo=typescript&logoColor=fff)
 ![Solana](https://img.shields.io/badge/Solana-Devnet-9945FF?logo=solana&logoColor=fff)
 
