@@ -60,3 +60,12 @@ export async function postExecutionResult(
 ): Promise<void> {
   await post("/execution-result", { id: requestId, command, approved, agent_id: agentId, trace });
 }
+
+export async function postIntentResult(
+  requestId: string,
+  trace: string,
+  decision: "accepted" | "rejected",
+  violations: import("./types.js").IntentViolation[]
+): Promise<void> {
+  await post("/intent-result", { id: requestId, trace, decision, violations });
+}

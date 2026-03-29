@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from fastapi import FastAPI
+from fastapi import BackgroundTasks, FastAPI
 from fastapi.responses import JSONResponse
 
 from models import (
@@ -17,6 +17,7 @@ from models import (
     ExecutionResultRequest,
     IntentCheckRequest,
     IntentCheckResponse,
+    IntentResultRequest,
     IntentViolation,
     VerifyRequest,
     VerifyResponse,
@@ -24,7 +25,7 @@ from models import (
 )
 from scanner import scan
 from auditor import audit_commands, check_intent as audit_intent
-from logger import log_event
+from logger import log_event, log_prompt, log_risk
 
 logging.basicConfig(
     level=os.environ.get("LOG_LEVEL", "DEBUG").upper(),
@@ -44,24 +45,29 @@ def _emit(event: DashboardEvent) -> None:
 @app.post("/check-intent")
 async def check_intent_endpoint(body: IntentCheckRequest) -> JSONResponse:
     violations = await audit_intent(body.trace)
-
     status = "BLOCKED" if violations else "APPROVED"
 
-    if status == "BLOCKED":
-        event = DashboardEvent(
-            event_type="intent_blocked",
-            request_id=body.id,
-            agent_id=AGENT_ID,
-            trace=body.trace,
-            timestamp=datetime.now(timezone.utc).isoformat(),
-        )
-        _emit(event)
-        sig = await log_event(event.model_dump())
-        if sig:
-            event.solana_signature = sig
+    if violations:
+        for v in violations:
+            event = DashboardEvent(
+                event_type="intent_blocked",
+                request_id=body.id,
+                agent_id=AGENT_ID,
+                trace=body.trace,
+                timestamp=datetime.now(timezone.utc).isoformat(),
+            )
+            _emit(event)
 
     response = IntentCheckResponse(id=body.id, status=status, violations=violations)
     return JSONResponse(content=response.model_dump())
+
+
+@app.post("/intent-result")
+async def intent_result_endpoint(body: IntentResultRequest, background_tasks: BackgroundTasks) -> JSONResponse:
+    background_tasks.add_task(log_prompt, body.id, body.trace, body.decision)
+    for v in body.violations:
+        background_tasks.add_task(log_risk, body.id, v.id, v.subject, v.reason, v.source_file, body.decision)
+    return JSONResponse(content={"status": "ok"})
 
 
 @app.post("/verify")

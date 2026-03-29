@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { v4 as uuidv4 } from "uuid";
-import { checkIntent } from "./verifier-client.js";
+import { checkIntent, postIntentResult } from "./verifier-client.js";
 
 const READ_FILE_TOOL: vscode.LanguageModelChatTool = {
   name: "read_file",
@@ -124,14 +124,18 @@ export async function handleRequest(
       .map((v, i) => `${i + 1}. ${v.subject}: ${v.reason}`)
       .join("\n");
 
-    const choice = await vscode.window.showWarningMessage(
-      "SentinelAI: Policy violations detected",
-      { modal: true, detail: `${violationDetail}\n\nProceed anyway?` },
-      "Yes",
-      "No",
-    );
+    let choice: string | undefined;
+    do {
+      choice = await vscode.window.showWarningMessage(
+        "SentinelAI: Policy violations detected",
+        { modal: true, detail: `${violationDetail}\n\nProceed anyway?` },
+        "Yes",
+        "No",
+      );
+    } while (choice === undefined);
 
     if (choice !== "Yes") {
+      postIntentResult(id, request.prompt, "rejected", intentResponse.violations).catch(() => {});
       const violationList = intentResponse.violations
         .map((v) => `- **${v.subject}**: ${v.reason}\n  Policy: ${v.policy_excerpt}`)
         .join("\n\n");
@@ -141,6 +145,7 @@ export async function handleRequest(
       return;
     }
 
+    postIntentResult(id, request.prompt, "accepted", intentResponse.violations).catch(() => {});
     userOverrodePolicy = true;
   }
 

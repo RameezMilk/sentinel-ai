@@ -13,7 +13,7 @@ export class VerifierProcess {
   }
 
   async start(verifierDir: string): Promise<void> {
-    const risksPath = path.join(path.dirname(verifierDir), "RISKS.md");
+    const risksPath = path.join(path.dirname(verifierDir), "risks");
 
     // Locate uvicorn
     const winPath = path.join(verifierDir, ".venv", "Scripts", "uvicorn");
@@ -27,7 +27,7 @@ export class VerifierProcess {
 
     this.proc = spawn(uvicorn, ["main:app", "--port", "8000", "--log-level", "warning"], {
       cwd: verifierDir,
-      env: { ...process.env, RISKS_MD_PATH: risksPath, LOG_LEVEL: process.env.LOG_LEVEL ?? "INFO" },
+      env: { ...process.env, RISKS_DIR: risksPath, LOG_LEVEL: process.env.LOG_LEVEL ?? "INFO" },
     });
 
     this.proc.stderr?.on("data", (data: Buffer) => {

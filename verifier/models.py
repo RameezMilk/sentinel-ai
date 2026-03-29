@@ -13,7 +13,7 @@ class Risk(BaseModel):
     id: str
     command: str
     reason: str
-    source: Literal["regex", "risks_md"]
+    source: str  # "regex" for pattern matches, or the policy filename e.g. "RISKS.md"
 
 
 class VerifyResponse(BaseModel):
@@ -29,15 +29,24 @@ class IntentCheckRequest(BaseModel):
 
 
 class IntentViolation(BaseModel):
+    id: str
     subject: str
     reason: str
     policy_excerpt: str
+    source_file: str  # the policy filename in risks/ that contains the violated rule, e.g. "RISKS.md"
 
 
 class IntentCheckResponse(BaseModel):
     id: str
     status: Literal["APPROVED", "BLOCKED"]
     violations: list[IntentViolation] = []
+
+
+class IntentResultRequest(BaseModel):
+    id: str  # prompt UID
+    trace: str
+    decision: Literal["accepted", "rejected"]
+    violations: list[IntentViolation]
 
 
 class ExecutionResultRequest(BaseModel):
