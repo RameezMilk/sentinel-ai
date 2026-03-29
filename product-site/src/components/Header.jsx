@@ -17,7 +17,7 @@ function Header() {
       <Navbar />
       <div className="header-spacer">
         <a
-          href="https://github.com/AhmedOHassan/catphish"
+          href="https://github.com/RameezMilk/sentinel-ai"
           target="_blank"
           rel="noopener noreferrer"
           className="cta-button header-github-btn"
