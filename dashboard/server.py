@@ -180,12 +180,21 @@ def api_analytics():
     total = len(risk_blocks)
     unaccepted = total - accepted
 
-    # --- line: risks per calendar day ------------------------------------
-    daily: defaultdict[str, int] = defaultdict(int)
+    # --- line: risks and prompts per calendar day ------------------------
+    prompt_blocks = [b for b in blocks if b.get("memo") and b["memo"].get("t") == "prompt"]
+
+    daily_risk: defaultdict[str, int] = defaultdict(int)
     for b in risk_blocks:
         if b.get("timestamp"):
-            daily[b["timestamp"][:10]] += 1
-    daily_sorted = sorted(daily.items())
+            daily_risk[b["timestamp"][:10]] += 1
+
+    daily_prompt: defaultdict[str, int] = defaultdict(int)
+    for b in prompt_blocks:
+        if b.get("timestamp"):
+            daily_prompt[b["timestamp"][:10]] += 1
+
+    all_dates = sorted(set(daily_risk) | set(daily_prompt))
+    daily_sorted = [(d, daily_risk[d]) for d in all_dates]
 
     # --- bar: risks per source file --------------------------------------
     source_counts: defaultdict[str, int] = defaultdict(int)
@@ -198,6 +207,7 @@ def api_analytics():
         "line": {
             "dates": [d[0] for d in daily_sorted],
             "counts": [d[1] for d in daily_sorted],
+            "prompt_counts": [daily_prompt[d[0]] for d in daily_sorted],
         },
         "bar": {
             "sources": list(source_counts.keys()),

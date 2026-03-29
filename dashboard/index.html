@@ -3,7 +3,11 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>SentinelAI — Blockchain Analytics</title>
+<title>Sentinel AI — Dashboard</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
@@ -13,121 +17,212 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:        #0b0b14;
-  --surface:   #11111e;
-  --surface2:  #18182a;
-  --border:    #1f1f38;
-  --purple:    #9945ff;
-  --purple-dim:#5c2b99;
-  --cyan:      #14f195;
-  --red:       #ff4560;
-  --green:     #14f195;
-  --text:      #ddddf5;
-  --muted:     #6b6b9a;
-  --font:      'Courier New', monospace;
+  --bg:       #f5f5f7;
+  --navy:     #1a1a2e;
+  --navy-2:   #2a2a3e;
+  --navy-3:   #3a3a50;
+  --font:     'Inter', system-ui, -apple-system, sans-serif;
+  --red:      #f87171;
+  --green:    #4ade80;
+  --purple:   #a78bfa;
 }
 
 html, body {
   height: 100%;
   background: var(--bg);
-  color: var(--text);
+  color: var(--navy);
   font-family: var(--font);
-  font-size: 13px;
+  font-size: 14px;
   overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* ── Header ───────────────────────────────────────────────────────────── */
 header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  padding: 0 3rem;
+  z-index: 100;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 20px;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface);
-  height: 48px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  height: 64px;
+  gap: 1rem;
 }
 
-header h1 {
-  font-size: 15px;
+/* Logo */
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.logo-text {
+  font-family: Garamond, 'EB Garamond', 'Times New Roman', serif;
+  font-size: 1.6rem;
   font-weight: 700;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--purple);
+  color: var(--navy);
+  letter-spacing: -0.02em;
 }
 
-header h1 span { color: var(--cyan); }
+/* Pill nav */
+.nav-pills {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.35rem;
+  border-radius: 50px;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.08);
+}
+
+.nav-pill {
+  position: relative;
+  padding: 0.55rem 1.8rem;
+  border: none;
+  border-radius: 50px;
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--font);
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: rgba(26, 26, 46, 0.55);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  transition: color 0.2s ease;
+}
+.nav-pill:hover { color: var(--navy); }
+.nav-pill.active {
+  color: #ffffff;
+  background: linear-gradient(180deg, #3a3a50 0%, #2a2a3e 30%, #1a1a2e 60%, #2a2a3e 100%);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Header right */
+.header-right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+}
 
 #status-bar {
   display: flex;
   align-items: center;
-  gap: 16px;
-  font-size: 11px;
-  color: var(--muted);
+  gap: 8px;
+  font-size: 0.72rem;
+  color: #000000;
 }
 
 #status-dot {
-  width: 8px; height: 8px;
+  width: 7px; height: 7px;
   border-radius: 50%;
-  background: var(--muted);
-  display: inline-block;
+  background: rgba(26, 26, 46, 0.2);
+  flex-shrink: 0;
 }
-#status-dot.live { background: var(--cyan); box-shadow: 0 0 6px var(--cyan); }
-#status-dot.error { background: var(--red); }
+#status-dot.live  { background: #22c55e; box-shadow: 0 0 6px rgba(34, 197, 94, 0.6); }
+#status-dot.error { background: #ef4444; }
+
+#countdown {
+  font-size: 0.7rem;
+  color: #000000;
+  font-variant-numeric: tabular-nums;
+}
+
+.github-btn {
+  font-family: var(--font);
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.6rem 1.8rem;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  background: var(--navy);
+  color: #ffffff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+.github-btn:hover { background: var(--navy-2); box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18); }
 
 /* ── Main grid ────────────────────────────────────────────────────────── */
 main {
   display: grid;
   grid-template-columns: 1fr 1.15fr 1fr;
   grid-template-rows: 1fr 1fr;
-  gap: 12px;
-  padding: 12px;
-  height: calc(100vh - 48px);
+  gap: 14px;
+  padding: 14px;
+  padding-top: 78px;
+  height: 100vh;
 }
 
-/* ── Cards ────────────────────────────────────────────────────────────── */
+/* ── Cards — dark metallic, same style as arch-cards on product site ─── */
 .card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 6px;
   display: flex;
   flex-direction: column;
+  border-radius: 14px;
+  background: linear-gradient(
+    145deg,
+    rgba(80, 80, 88, 0.92) 0%,
+    rgba(55, 55, 62, 0.95) 40%,
+    rgba(40, 40, 48, 0.98) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
   overflow: hidden;
-  position: relative;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
-.card-blockchain { grid-row: 1 / 3; }
-.card-pie        { grid-row: 1 / 3; }
-.card-line       { grid-row: 1; }
-.card-bar        { grid-row: 2; }
+.card-blockchain { grid-column: 1; grid-row: 1 / 3; }
+.card-line       { grid-column: 2; grid-row: 2; }
+.card-pie        { grid-column: 3; grid-row: 1; }
+.card-bar        { grid-column: 2; grid-row: 1; }
+.card-ratio      { grid-column: 3; grid-row: 2; }
 
 .card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 14px;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface2);
+  padding: 10px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.03);
   flex-shrink: 0;
 }
 
 .card-title {
-  font-size: 11px;
+  font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 1.5px;
   text-transform: uppercase;
-  color: var(--purple);
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .card-meta {
-  font-size: 10px;
-  color: var(--muted);
+  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.25);
 }
 
 .card-body {
   flex: 1;
   overflow: hidden;
   position: relative;
-  padding: 10px;
+  padding: 12px;
 }
 
 /* ── Loading / empty states ───────────────────────────────────────────── */
@@ -137,15 +232,15 @@ main {
   align-items: center;
   justify-content: center;
   height: 100%;
-  gap: 8px;
-  color: var(--muted);
-  font-size: 11px;
+  gap: 10px;
+  color: rgba(255, 255, 255, 0.2);
+  font-size: 0.75rem;
 }
 
 .spinner {
-  width: 24px; height: 24px;
-  border: 2px solid var(--border);
-  border-top-color: var(--purple);
+  width: 22px; height: 22px;
+  border: 2px solid rgba(255, 255, 255, 0.08);
+  border-top-color: rgba(255, 255, 255, 0.45);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -158,10 +253,10 @@ main {
   overflow-x: hidden;
   padding: 4px 6px 4px 14px;
   scrollbar-width: thin;
-  scrollbar-color: var(--border) transparent;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
 }
 #chain-container::-webkit-scrollbar { width: 4px; }
-#chain-container::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+#chain-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
 
 .chain-list {
   position: relative;
@@ -169,13 +264,17 @@ main {
   list-style: none;
 }
 
-/* vertical spine */
 .chain-list::before {
   content: '';
   position: absolute;
   left: 8px; top: 0; bottom: 0;
   width: 2px;
-  background: linear-gradient(to bottom, var(--purple) 0%, var(--purple-dim) 60%, transparent 100%);
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.25) 0%,
+    rgba(255, 255, 255, 0.06) 60%,
+    transparent 100%
+  );
 }
 
 .block-item {
@@ -184,101 +283,98 @@ main {
   cursor: pointer;
 }
 
-/* connector dot */
 .block-item::before {
   content: '';
   position: absolute;
   left: -20px; top: 50%;
   transform: translateY(-50%);
-  width: 10px; height: 10px;
+  width: 9px; height: 9px;
   border-radius: 50%;
-  border: 2px solid var(--purple);
-  background: var(--bg);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  background: rgba(40, 40, 48, 0.98);
   z-index: 1;
 }
 
 .block-item:first-child::before {
-  background: var(--purple);
-  box-shadow: 0 0 8px var(--purple);
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.35);
 }
 
 .block-tile {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 7px 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 8px;
+  padding: 8px 12px;
   transition: border-color 0.15s, background 0.15s;
-  position: relative;
-}
-
-.block-item:first-child .block-tile {
-  border-color: var(--purple-dim);
 }
 
 .block-tile:hover {
-  border-color: var(--purple);
-  background: #1c1c32;
+  border-color: rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.09);
 }
 
 .block-sig {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--cyan);
-  letter-spacing: 0.5px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.78);
+  letter-spacing: 0.3px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-family: 'Courier New', monospace;
 }
 
 .block-meta-row {
   display: flex;
   justify-content: space-between;
-  margin-top: 3px;
-  font-size: 10px;
-  color: var(--muted);
+  margin-top: 4px;
+  font-size: 0.62rem;
+  color: rgba(255, 255, 255, 0.28);
 }
 
 .block-type {
-  font-size: 9px;
-  padding: 1px 5px;
-  border-radius: 2px;
+  font-size: 0.58rem;
+  padding: 1px 7px;
+  border-radius: 20px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   font-weight: 700;
 }
 
-.type-risk    { background: rgba(255,69,96,0.2);  color: var(--red); }
-.type-prompt  { background: rgba(153,69,255,0.2); color: var(--purple); }
-.type-unknown { background: rgba(107,107,154,0.15); color: var(--muted); }
-.type-error   { background: rgba(255,69,96,0.1);  color: #884455; }
+.type-risk    { background: rgba(248, 113, 113, 0.2); color: #fca5a5; }
+.type-prompt  { background: rgba(255, 255, 255, 0.1); color: rgba(255,255,255,0.55); }
+.type-unknown { background: rgba(255, 255, 255, 0.05); color: rgba(255,255,255,0.28); }
+.type-error   { background: rgba(248, 113, 113, 0.08); color: rgba(252,165,165,0.45); }
 
 /* ── Tooltip ──────────────────────────────────────────────────────────── */
 #tooltip {
   position: fixed;
   z-index: 9999;
-  background: #0d0d1c;
-  border: 1px solid var(--purple);
-  border-radius: 5px;
-  padding: 10px 12px;
+  background: rgba(20, 20, 34, 0.97);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 12px 14px;
   max-width: 380px;
   max-height: 300px;
   overflow: auto;
-  font-size: 10px;
-  line-height: 1.5;
-  color: var(--text);
+  font-size: 0.68rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.78);
   pointer-events: none;
   display: none;
   white-space: pre;
-  box-shadow: 0 4px 24px rgba(153,69,255,0.3);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
   scrollbar-width: thin;
-  scrollbar-color: var(--border) transparent;
+  scrollbar-color: rgba(255,255,255,0.1) transparent;
+  font-family: 'Courier New', monospace;
 }
 
-#tooltip .tt-key   { color: var(--cyan); }
-#tooltip .tt-str   { color: #e8b86d; }
-#tooltip .tt-num   { color: #7ec8e3; }
-#tooltip .tt-bool  { color: var(--purple); }
-#tooltip .tt-null  { color: var(--muted); }
+#tooltip .tt-key  { color: #93c5fd; }
+#tooltip .tt-str  { color: #fcd34d; }
+#tooltip .tt-num  { color: #86efac; }
+#tooltip .tt-bool { color: #c4b5fd; }
+#tooltip .tt-null { color: rgba(255, 255, 255, 0.28); }
 
 /* ── Chart canvases ───────────────────────────────────────────────────── */
 .chart-wrap {
@@ -294,8 +390,9 @@ canvas { display: block; }
   display: flex;
   justify-content: center;
   gap: 20px;
-  padding: 6px 0 2px;
-  font-size: 11px;
+  padding: 6px 0 4px;
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.38);
   flex-shrink: 0;
 }
 
@@ -306,33 +403,31 @@ canvas { display: block; }
 }
 
 .legend-dot {
-  width: 10px; height: 10px;
+  width: 8px; height: 8px;
   border-radius: 50%;
   flex-shrink: 0;
-}
-
-/* ── Refresh countdown ────────────────────────────────────────────────── */
-#countdown {
-  font-size: 10px;
-  color: var(--muted);
-  font-variant-numeric: tabular-nums;
 }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>Sentinel<span>AI</span> &mdash; Blockchain Analytics</h1>
-  <div id="status-bar">
-    <span id="status-dot"></span>
-    <span id="status-text">Connecting…</span>
-    <span id="countdown"></span>
+  <div class="logo-container">
+    <span class="logo-text">Sentinel AI</span>
+  </div>
+
+  <div class="header-right">
+    <div id="status-bar">
+      <span id="status-dot"></span>
+      <span id="status-text">Connecting…</span>
+      <span id="countdown"></span>
+    </div>
   </div>
 </header>
 
 <main>
 
-  <!-- ── Card 1: Blockchain blocks ──────────────────────────────────── -->
+  <!-- ── Card 1: Blockchain blocks ───────────────────────────────────── -->
   <div class="card card-blockchain">
     <div class="card-header">
       <span class="card-title">Solana Chain</span>
@@ -345,7 +440,7 @@ canvas { display: block; }
     </div>
   </div>
 
-  <!-- ── Card 2: Pie chart ───────────────────────────────────────────── -->
+  <!-- ── Card 2: Pie chart ────────────────────────────────────────────── -->
   <div class="card card-pie">
     <div class="card-header">
       <span class="card-title">Risk Acceptance</span>
@@ -354,11 +449,11 @@ canvas { display: block; }
     <div class="card-body" style="display:flex;flex-direction:column;">
       <div id="pie-legend">
         <div class="legend-item">
-          <div class="legend-dot" style="background:var(--red)"></div>
+          <div class="legend-dot" style="background:#f87171"></div>
           <span>Accepted (risky)</span>
         </div>
         <div class="legend-item">
-          <div class="legend-dot" style="background:var(--green)"></div>
+          <div class="legend-dot" style="background:#4ade80"></div>
           <span>Rejected (safe)</span>
         </div>
       </div>
@@ -368,7 +463,7 @@ canvas { display: block; }
     </div>
   </div>
 
-  <!-- ── Card 3: Line chart ─────────────────────────────────────────── -->
+  <!-- ── Card 3: Line chart ───────────────────────────────────────────── -->
   <div class="card card-line">
     <div class="card-header">
       <span class="card-title">Risks Over Time</span>
@@ -381,7 +476,7 @@ canvas { display: block; }
     </div>
   </div>
 
-  <!-- ── Card 4: Bar chart ──────────────────────────────────────────── -->
+  <!-- ── Card 4: Bar chart (bottom center) ───────────────────────────── -->
   <div class="card card-bar">
     <div class="card-header">
       <span class="card-title">Risks by Source</span>
@@ -394,6 +489,19 @@ canvas { display: block; }
     </div>
   </div>
 
+  <!-- ── Card 5: Risk ratio line (bottom right) ───────────────────────── -->
+  <div class="card card-ratio">
+    <div class="card-header">
+      <span class="card-title">Risk Ratio</span>
+      <span class="card-meta" id="ratio-meta">(risks / prompts) × 100</span>
+    </div>
+    <div class="card-body">
+      <div class="chart-wrap">
+        <canvas id="ratioCanvas"></canvas>
+      </div>
+    </div>
+  </div>
+
 </main>
 
 <!-- Floating JSON tooltip -->
@@ -401,16 +509,15 @@ canvas { display: block; }
 
 <script>
 // ── Chart.js global defaults ─────────────────────────────────────────────
-Chart.defaults.color = '#6b6b9a';
-Chart.defaults.font.family = "'Courier New', monospace";
+Chart.defaults.color = 'rgba(255,255,255,0.38)';
+Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
 Chart.defaults.font.size = 11;
 Chart.register(ChartDataLabels);
 
-const PURPLE  = '#9945ff';
-const RED     = '#ff4560';
-const GREEN   = '#14f195';
-const GRID    = '#1f1f38';
-const SURFACE = '#18182a';
+const PURPLE = '#a78bfa';
+const RED    = '#f87171';
+const GREEN  = '#4ade80';
+const GRID   = 'rgba(255,255,255,0.06)';
 
 // ── Tooltip helpers ──────────────────────────────────────────────────────
 const tooltip = document.getElementById('tooltip');
@@ -449,15 +556,13 @@ function positionTooltip(evt) {
   tooltip.style.top  = y + 'px';
 }
 
-function hideTooltip() {
-  tooltip.style.display = 'none';
-}
+function hideTooltip() { tooltip.style.display = 'none'; }
 
 document.addEventListener('mousemove', evt => {
   if (tooltip.style.display === 'block') positionTooltip(evt);
 });
 
-// ── Blockchain chain render ───────────────────────────────────────────────
+// ── Blockchain chain render ──────────────────────────────────────────────
 function sigLabel(sig) {
   if (!sig || sig.length < 20) return sig || '???';
   return sig.slice(0, 8) + '…' + sig.slice(-8);
@@ -493,8 +598,8 @@ function renderChain(blocks) {
   const ul = document.createElement('ul');
   ul.className = 'chain-list';
 
-  blocks.forEach((b, idx) => {
-    const li   = document.createElement('li');
+  blocks.forEach(b => {
+    const li = document.createElement('li');
     li.className = 'block-item';
 
     const typeClass = b.err ? 'type-error' : blockTypeClass(b.memo);
@@ -518,7 +623,6 @@ function renderChain(blocks) {
       </div>`;
 
     const tile = li.querySelector('.block-tile');
-
     tile.addEventListener('mouseenter', evt => {
       const data = b.memo
         ? { ...b.memo, _slot: b.slot, _sig: b.signature }
@@ -534,14 +638,13 @@ function renderChain(blocks) {
   container.appendChild(ul);
 }
 
-// ── Charts ────────────────────────────────────────────────────────────────
-let pieChart  = null;
-let lineChart = null;
-let barChart  = null;
+// ── Charts ───────────────────────────────────────────────────────────────
+let pieChart   = null;
+let lineChart  = null;
+let barChart   = null;
+let ratioChart = null;
 
-const CHART_DEFAULTS = {
-  animation: { duration: 400 },
-};
+const CHART_DEFAULTS = { animation: { duration: 400 } };
 
 function buildPie(data) {
   const { accepted, unaccepted, total } = data;
@@ -552,11 +655,7 @@ function buildPie(data) {
   document.getElementById('pie-meta').textContent =
     total ? `${total} risks total` : 'no data';
 
-  if (!total) {
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    pieChart = null;
-    return;
-  }
+  if (!total) { ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height); pieChart = null; return; }
 
   pieChart = new Chart(ctx, {
     type: 'pie',
@@ -565,7 +664,7 @@ function buildPie(data) {
       datasets: [{
         data: [accepted, unaccepted],
         backgroundColor: [RED, GREEN],
-        borderColor: ['#0b0b14'],
+        borderColor: ['rgba(40,40,48,0.98)'],
         borderWidth: 3,
         hoverBorderWidth: 3,
       }],
@@ -586,9 +685,9 @@ function buildPie(data) {
           },
         },
         datalabels: {
-          color: '#fff',
-          font: { size: 14, weight: 'bold', family: "'Courier New', monospace" },
-          formatter: (val) => {
+          color: 'rgba(255,255,255,0.85)',
+          font: { size: 14, weight: 'bold', family: "'Inter', system-ui, sans-serif" },
+          formatter: val => {
             if (!total || val === 0) return '';
             return ((val / total) * 100).toFixed(1) + '%';
           },
@@ -607,15 +706,11 @@ function buildLine(data) {
   document.getElementById('line-meta').textContent =
     dates.length ? `${dates.length} days` : 'no data';
 
-  if (!dates.length) {
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    lineChart = null;
-    return;
-  }
+  if (!dates.length) { ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height); lineChart = null; return; }
 
   const gradient = ctx.createLinearGradient(0, 0, 0, 200);
-  gradient.addColorStop(0, 'rgba(153,69,255,0.35)');
-  gradient.addColorStop(1, 'rgba(153,69,255,0.0)');
+  gradient.addColorStop(0, 'rgba(167,139,250,0.3)');
+  gradient.addColorStop(1, 'rgba(167,139,250,0.0)');
 
   lineChart = new Chart(ctx, {
     type: 'line',
@@ -645,7 +740,8 @@ function buildLine(data) {
       scales: {
         x: {
           grid: { color: GRID },
-          ticks: { maxRotation: 35, maxTicksLimit: 8 },
+          ticks: { maxRotation: 35, maxTicksLimit: 8, color: 'rgba(255,255,255,0.32)' },
+          border: { color: GRID },
         },
         y: {
           grid: { color: GRID },
@@ -653,7 +749,9 @@ function buildLine(data) {
           ticks: {
             stepSize: 1,
             callback: v => (Number.isInteger(v) ? v : ''),
+            color: 'rgba(255,255,255,0.32)',
           },
+          border: { color: GRID },
         },
       },
     },
@@ -661,7 +759,7 @@ function buildLine(data) {
 }
 
 function buildBar(data) {
-  const { sources, counts } = data;
+  let { sources, counts } = data;
   const ctx = document.getElementById('barCanvas').getContext('2d');
 
   if (barChart) barChart.destroy();
@@ -669,21 +767,22 @@ function buildBar(data) {
   document.getElementById('bar-meta').textContent =
     sources.length ? `${sources.length} sources` : 'no data';
 
-  if (!sources.length) {
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    barChart = null;
-    return;
-  }
+  if (!sources.length) { ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height); barChart = null; return; }
 
-  // colour each bar by source type
+  // Sort descending by count
+  const order = counts.map((c, i) => ({ c, s: sources[i] }))
+    .sort((a, b) => b.c - a.c);
+  sources = order.map(o => o.s);
+  counts  = order.map(o => o.c);
+
   const colours = sources.map(s => {
-    if (s === 'regex')               return '#7ec8e3';  // cyan-ish
-    if (s.toLowerCase().includes('risk'))        return RED;
-    if (s.toLowerCase().includes('injection'))   return '#ff9f40';
-    if (s.toLowerCase().includes('secret'))      return '#ffcd56';
-    if (s.toLowerCase().includes('crypto'))      return '#a3e635';
-    if (s.toLowerCase().includes('supply'))      return '#fb923c';
-    if (s.toLowerCase().includes('data'))        return '#818cf8';
+    if (s === 'regex')                             return '#7dd3fc';
+    if (s.toLowerCase().includes('risk'))          return RED;
+    if (s.toLowerCase().includes('injection'))     return '#fb923c';
+    if (s.toLowerCase().includes('secret'))        return '#fbbf24';
+    if (s.toLowerCase().includes('crypto'))        return '#a3e635';
+    if (s.toLowerCase().includes('supply'))        return '#f97316';
+    if (s.toLowerCase().includes('data'))          return '#818cf8';
     return PURPLE;
   });
 
@@ -695,7 +794,7 @@ function buildBar(data) {
         label: 'Count',
         data: counts,
         backgroundColor: colours,
-        borderRadius: 3,
+        borderRadius: 4,
         borderSkipped: false,
       }],
     },
@@ -708,7 +807,7 @@ function buildBar(data) {
         datalabels: {
           anchor: 'end',
           align: 'top',
-          color: '#ddddf5',
+          color: 'rgba(255,255,255,0.7)',
           font: { size: 10, weight: 'bold' },
           formatter: v => v,
         },
@@ -718,11 +817,13 @@ function buildBar(data) {
           grid: { display: false },
           ticks: {
             maxRotation: 30,
+            color: 'rgba(255,255,255,0.32)',
             callback(val) {
               const lbl = this.getLabelForValue(val);
               return lbl.length > 14 ? lbl.slice(0, 12) + '…' : lbl;
             },
           },
+          border: { color: GRID },
         },
         y: {
           grid: { color: GRID },
@@ -730,7 +831,87 @@ function buildBar(data) {
           ticks: {
             stepSize: 1,
             callback: v => (Number.isInteger(v) ? v : ''),
+            color: 'rgba(255,255,255,0.32)',
           },
+          border: { color: GRID },
+        },
+      },
+    },
+  });
+}
+
+function buildRatioLine(data) {
+  const { dates, counts, prompt_counts } = data;
+  const ctx = document.getElementById('ratioCanvas').getContext('2d');
+
+  if (ratioChart) ratioChart.destroy();
+
+  // Compute ratio per day: (risk / prompt) * 100, skip days with 0 prompts
+  const ratios = dates.map((_, i) => {
+    const p = prompt_counts[i] || 0;
+    if (p === 0) return null;
+    return +((counts[i] / p) * 100).toFixed(1);
+  });
+
+  const validCount = ratios.filter(v => v !== null).length;
+  document.getElementById('ratio-meta').textContent =
+    validCount ? `${validCount} days` : 'no data';
+
+  if (!validCount) {
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ratioChart = null;
+    return;
+  }
+
+  const gradient = ctx.createLinearGradient(0, 0, 0, 200);
+  gradient.addColorStop(0, 'rgba(251,191,36,0.3)');
+  gradient.addColorStop(1, 'rgba(251,191,36,0.0)');
+
+  ratioChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: dates,
+      datasets: [{
+        label: 'Risk Ratio %',
+        data: ratios,
+        borderColor: '#fbbf24',
+        borderWidth: 2,
+        pointBackgroundColor: '#fbbf24',
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        tension: 0.3,
+        fill: true,
+        backgroundColor: gradient,
+        spanGaps: false,
+      }],
+    },
+    options: {
+      ...CHART_DEFAULTS,
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        datalabels: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => ` ${ctx.parsed.y}%`,
+          },
+        },
+      },
+      scales: {
+        x: {
+          grid: { color: GRID },
+          ticks: { maxRotation: 35, maxTicksLimit: 8, color: 'rgba(255,255,255,0.32)' },
+          border: { color: GRID },
+        },
+        y: {
+          grid: { color: GRID },
+          beginAtZero: true,
+          ticks: {
+            callback: v => v + '%',
+            color: 'rgba(255,255,255,0.32)',
+          },
+          border: { color: GRID },
         },
       },
     },
@@ -743,8 +924,8 @@ const statusTx = document.getElementById('status-text');
 
 function setStatus(state, text) {
   dot.className = '';
-  if (state === 'live')  { dot.classList.add('live');  }
-  if (state === 'error') { dot.classList.add('error'); }
+  if (state === 'live')  dot.classList.add('live');
+  if (state === 'error') dot.classList.add('error');
   statusTx.textContent = text;
 }
 
@@ -768,6 +949,7 @@ async function refresh() {
     buildPie(analytics.pie);
     buildLine(analytics.line);
     buildBar(analytics.bar);
+    buildRatioLine(analytics.line);
 
     const pubkey = chain.public_key;
     const shortKey = pubkey
@@ -782,7 +964,7 @@ async function refresh() {
 }
 
 // ── Countdown & auto-refresh ─────────────────────────────────────────────
-const REFRESH_INTERVAL = 30; // seconds
+const REFRESH_INTERVAL = 30;
 let countdown = REFRESH_INTERVAL;
 const countdownEl = document.getElementById('countdown');
 
