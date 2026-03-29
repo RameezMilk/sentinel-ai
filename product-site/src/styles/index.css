@@ -29,20 +29,18 @@ body {
 }
 
 #root {
-  min-height: 100vh;
 }
 
 main {
-  min-height: 100vh;
+  min-height: 0;
 }
 
 /* Hero Section */
 .hero {
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   padding: 0;
-  overflow: hidden;
 }
 
 /* Header */
@@ -279,7 +277,8 @@ main {
   box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  min-width: 135px;
+  min-width: 150px;
+  width: 150px;
 }
 
 .arch-label {
@@ -341,17 +340,14 @@ main {
 
 /* Page Layouts */
 .page {
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
 .page-content {
-  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   padding: 2rem;
   padding-top: 10rem;
   text-align: center;
@@ -477,7 +473,7 @@ main {
   color: var(--color-text-primary);
 }
 
-/* Responsive Adjustments */
+/* Responsive Adjustments — Tablet */
 @media (max-width: 768px) {
   .header {
     padding: 1rem 1.5rem;
@@ -486,8 +482,8 @@ main {
   }
 
   .logo-image {
-    width: 60px;
-    height: 60px;
+    width: 50px;
+    height: 50px;
   }
 
   .logo-text {
@@ -495,7 +491,13 @@ main {
   }
 
   .header-spacer {
-    display: none;
+    flex: 1;
+    justify-content: flex-end;
+  }
+
+  .header-github-btn {
+    font-size: 0.8rem;
+    padding: 0.5rem 1.2rem;
   }
 
   .navbar {
@@ -505,8 +507,8 @@ main {
   }
 
   .navbar-tab {
-    padding: 0.5rem 1rem;
-    font-size: 0.8rem;
+    padding: 0.5rem 1.5rem;
+    font-size: 0.85rem;
   }
 
   .hero-content {
@@ -514,8 +516,58 @@ main {
     padding-top: 160px;
   }
 
+  .hero-row {
+    flex-direction: column;
+    padding: 0 2rem;
+    gap: 2rem;
+    text-align: center;
+  }
+
+  .hero-text-group {
+    align-items: center;
+  }
+
   .hero-tagline {
-    margin-bottom: 1rem;
+    white-space: normal;
+    margin-bottom: 0.5rem;
+    text-align: center;
+  }
+
+  .hero-subheading {
+    text-align: center;
+  }
+
+  .hero-image {
+    width: clamp(250px, 60vw, 400px);
+  }
+
+  .arch-wrapper {
+    margin-top: 1rem;
+  }
+
+  .arch-heading {
+    font-size: 1.6rem;
+  }
+
+  .arch-container {
+    flex-direction: column;
+    padding: 0 1rem;
+    gap: 0;
+  }
+
+  .arch-step {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .arch-step .arch-arrow {
+    margin: 0.3rem 0;
+    transform: rotate(90deg);
+  }
+
+  .arch-card {
+    min-width: 220px;
+    width: 220px;
   }
 
   .team-grid {
@@ -541,5 +593,108 @@ main {
   .linkedin-badge svg {
     width: 14px;
     height: 14px;
+  }
+
+  .page-content {
+    padding-top: 8rem;
+  }
+}
+
+/* Responsive Adjustments — Mobile */
+@media (max-width: 480px) {
+  .header {
+    padding: 0.75rem 1rem;
+    gap: 0.75rem;
+  }
+
+  .logo-image {
+    width: 40px;
+    height: 40px;
+  }
+
+  .logo-text {
+    font-size: 1.25rem;
+  }
+
+  .header-github-btn {
+    font-size: 0.75rem;
+    padding: 0.45rem 1rem;
+  }
+
+  .navbar-tab {
+    padding: 0.5rem 1.2rem;
+    font-size: 0.8rem;
+  }
+
+  .hero-content {
+    padding: 1rem;
+    padding-top: 140px;
+  }
+
+  .hero-row {
+    padding: 0 1rem;
+    gap: 1.5rem;
+  }
+
+  .hero-tagline {
+    font-size: clamp(1.8rem, 7vw, 2.5rem);
+  }
+
+  .hero-subheading {
+    font-size: clamp(1rem, 3.5vw, 1.25rem);
+  }
+
+  .hero-image {
+    width: clamp(200px, 70vw, 300px);
+  }
+
+  .arch-heading {
+    font-size: 1.3rem;
+  }
+
+  .arch-card {
+    min-width: 200px;
+    width: 200px;
+    padding: 0.9rem 1.2rem;
+  }
+
+  .arch-label {
+    font-size: 0.8rem;
+  }
+
+  .arch-sub {
+    font-size: 0.6rem;
+  }
+
+  .page-content {
+    padding: 1.5rem;
+    padding-top: 7rem;
+  }
+
+  .page-title {
+    font-size: clamp(2rem, 8vw, 3rem);
+  }
+
+  .team-grid {
+    gap: 1.5rem;
+  }
+
+  .team-member-image {
+    width: 100px;
+    height: 100px;
+  }
+
+  .team-member-name {
+    font-size: 0.9rem;
+  }
+
+  .linkedin-badge {
+    width: 24px;
+    height: 24px;
+  }
+
+  .linkedin-badge svg {
+    width: 13px;
+    height: 13px;
   }
 }
