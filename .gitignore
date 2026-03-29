@@ -1,0 +1,35 @@
+# Environment variables (never commit secrets)
+.env
+.env.*
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+
+# Node / VS Code extension
+node_modules/
+vscode-extension/dist/
+vscode-extension/*.vsix
+vscode-extension/*.js.map
+
+# Solana keypair (contains private key)
+~/.config/solana/id.json
+*.json.bak
+
+# VS Code
+.vscode/settings.json
+.vscode/launch.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# ignore temporary files
+tests/
