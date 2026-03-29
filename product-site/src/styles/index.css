@@ -155,13 +155,30 @@ main {
 .hero-row {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 2rem;
+  justify-content: space-between;
+  gap: 0;
+  width: 100%;
+  padding: 0 4rem 0 8rem;
+}
+
+.hero-text-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.hero-subheading {
+  font-size: clamp(1.35rem, 1.8vw, 1.65rem);
+  font-weight: 400;
+  color: var(--color-text-secondary);
+  text-align: left;
+  line-height: 1.5;
 }
 
 /* Hero Tagline - Dark Metallic Effect */
 .hero-tagline {
-  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-size: clamp(2.5rem, 4vw, 4.5rem);
+  white-space: nowrap;
   font-weight: 800;
   line-height: 1.1;
   letter-spacing: -0.03em;
@@ -197,11 +214,98 @@ main {
   background-clip: text;
 }
 
+/* Architecture Diagram */
+.arch-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: -3rem;
+}
+
+.arch-heading {
+  font-size: 2.2rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  background: linear-gradient(
+    180deg,
+    #1a1a2e 0%,
+    #2d2d44 20%,
+    #4a4a60 40%,
+    #3a3a50 50%,
+    #2d2d44 60%,
+    #4a4a60 80%,
+    #1a1a2e 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.arch-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 0 2rem;
+}
+
+.arch-step {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.arch-step .arch-arrow {
+  margin: 0 0.4rem;
+}
+
+.arch-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 1.1rem 1.5rem;
+  border-radius: 12px;
+  background: linear-gradient(
+    145deg,
+    rgba(80, 80, 88, 0.9) 0%,
+    rgba(55, 55, 62, 0.95) 40%,
+    rgba(40, 40, 48, 0.95) 100%
+  );
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  min-width: 135px;
+}
+
+.arch-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  white-space: nowrap;
+}
+
+.arch-sub {
+  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.4);
+  white-space: nowrap;
+}
+
+.arch-arrow {
+  flex-shrink: 0;
+}
+
 /* Hero Image */
 .hero-image {
-  width: clamp(250px, 30vw, 450px);
+  width: clamp(375px, 45vw, 675px);
   height: auto;
   object-fit: contain;
+  position: relative;
+  top: 1rem;
 }
 
 /* Header Github Button */
