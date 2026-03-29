@@ -3,6 +3,7 @@
 Sentinel AI is a runtime observability and interception layer for AI coding assistants. It intercepts, validates, and audits every AI-generated action in real time, screening prompts and file saves against a customisable governance policy, blocking dangerous commands, and writing every decision immutably to the Solana blockchain.
 
 ![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688?logo=fastapi&logoColor=fff)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5+-3178C6?logo=typescript&logoColor=fff)
 ![Solana](https://img.shields.io/badge/Solana-Devnet-9945FF?logo=solana&logoColor=fff)
 
@@ -194,7 +195,7 @@ Opens on http://localhost:5173
 
 ## 🛡 Features
 
-- **Intent screening:** Every `@sentinelai-guard` message is checked against policy before reaching Copilot — blocked requests never leave the machine.
+- **Tool call interception:** When Copilot attempts to edit a file, SentinelAI intercepts the call and checks the generated code content plus the original user request against policy before any file is written, violations trigger a modal with Yes/No override.
 - **File save protection:** `onWillSaveTextDocument` intercepts saves; files violating policy are cancelled with an inline notification.
 - **Dual-layer detection:** Regex patterns catch known dangerous commands instantly; Gemini 2.5 Flash handles nuanced, context-aware violations.
 - **Live policy editing:** Update any `.md` file in `risks/` and the change takes effect on the next request — no restart needed.
@@ -209,23 +210,21 @@ Opens on http://localhost:5173
 User types @sentinelai-guard <message>
         │
         ▼
-guardian.ts  →  POST /check-intent  →  auditor.py (Gemini + RISKS.md)
-        │
-        ├── BLOCKED  →  show policy violations in chat, log to Solana
-        │
-        └── APPROVED →  forward to Copilot gpt-4o, stream response
+guardian.ts  →  forward to Copilot, stream response
                               │
                               ▼
-                    Copilot suggests shell commands
+                    Copilot calls edit_file tool
                               │
                               ▼
-                    POST /verify  →  scanner.py (regex) + auditor.py (Gemini)
+              POST /check-intent  →  auditor.py (Gemini + RISKS.md)
+              (trace = user prompt + file path + generated content)
                               │
-                              ├── RISKY  →  prompt user to accept / deny
+                              ├── BLOCKED  →  modal (Yes / No)
                               │                    │
-                              │              log decision to Solana
+                              │         Yes → apply edit, log to Solana
+                              │         No  → cancel edit, log to Solana
                               │
-                              └── SAFE   →  execute
+                              └── APPROVED →  apply edit
 ```
 
 File saves follow the same `/check-intent` path and are cancelled if a violation is found.
