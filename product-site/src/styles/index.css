@@ -29,20 +29,18 @@ body {
 }
 
 #root {
-  min-height: 100vh;
 }
 
 main {
-  min-height: 100vh;
+  min-height: 0;
 }
 
 /* Hero Section */
 .hero {
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   padding: 0;
-  overflow: hidden;
 }
 
 /* Header */
@@ -342,17 +340,14 @@ main {
 
 /* Page Layouts */
 .page {
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
 .page-content {
-  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   padding: 2rem;
   padding-top: 10rem;
   text-align: center;
@@ -514,11 +509,6 @@ main {
   .navbar-tab {
     padding: 0.5rem 1.5rem;
     font-size: 0.85rem;
-  }
-
-  .hero {
-    height: auto;
-    min-height: 100vh;
   }
 
   .hero-content {
