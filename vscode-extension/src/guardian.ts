@@ -107,48 +107,6 @@ export async function handleRequest(
 ): Promise<void> {
   const id = uuidv4();
 
-  let intentResponse;
-  try {
-    intentResponse = await checkIntent(id, request.prompt);
-  } catch {
-    stream.markdown(
-      "**SentinelAI: Verifier unreachable**\n\nThis request has been blocked because SentinelAI could not reach the verifier service. Ensure the verifier is running and try again."
-    );
-    return;
-  }
-
-  let userOverrodePolicy = false;
-
-  if (intentResponse.status === "BLOCKED") {
-    const violationDetail = intentResponse.violations
-      .map((v, i) => `${i + 1}. ${v.subject}: ${v.reason}`)
-      .join("\n");
-
-    let choice: string | undefined;
-    do {
-      choice = await vscode.window.showWarningMessage(
-        "SentinelAI: Policy violations detected",
-        { modal: true, detail: `${violationDetail}\n\nProceed anyway?` },
-        "Yes",
-        "No",
-      );
-    } while (choice === undefined);
-
-    if (choice !== "Yes") {
-      postIntentResult(id, request.prompt, "rejected", intentResponse.violations).catch(() => {});
-      const violationList = intentResponse.violations
-        .map((v) => `- **${v.subject}**: ${v.reason}\n  Policy: ${v.policy_excerpt}`)
-        .join("\n\n");
-      stream.markdown(
-        `**SentinelAI blocked this request**\n\nThe following policy violations were detected:\n\n${violationList}\n\nEdit your request to comply with the project governance policy (RISKS.md).`
-      );
-      return;
-    }
-
-    postIntentResult(id, request.prompt, "accepted", intentResponse.violations).catch(() => {});
-    userOverrodePolicy = true;
-  }
-
   const model = request.model;
 
   const messages: vscode.LanguageModelChatMessage[] = [
@@ -186,13 +144,6 @@ export async function handleRequest(
     ));
   }
 
-  if (userOverrodePolicy) {
-    messages.push(vscode.LanguageModelChatMessage.User(
-      "The user has reviewed the SentinelAI policy warnings and explicitly chosen to proceed. " +
-      "Fulfil the request as asked."
-    ));
-  }
-
   messages.push(vscode.LanguageModelChatMessage.User(request.prompt));
 
   const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri;
@@ -203,6 +154,7 @@ export async function handleRequest(
     const assistantParts: Array<vscode.LanguageModelTextPart | vscode.LanguageModelToolCallPart> = [];
     const toolResults: vscode.LanguageModelToolResultPart[] = [];
     let hasToolCalls = false;
+    let blocked = false;
 
     for await (const chunk of response.stream) {
       if (chunk instanceof vscode.LanguageModelTextPart) {
@@ -225,6 +177,39 @@ export async function handleRequest(
           }
         } else if (chunk.name === "edit_file" && workspaceRoot) {
           const input = chunk.input as EditFileInput;
+
+          const editTrace = `User request: ${request.prompt}\n\nCopilot is about to edit file: ${input.filePath}\n\nNew content:\n${input.newContent}`;
+          const editCheck = await checkIntent(id, editTrace);
+          if (editCheck.status === "BLOCKED") {
+            const violationDetail = editCheck.violations
+              .map((v, i) => `${i + 1}. ${v.subject}: ${v.reason}`)
+              .join("\n");
+
+            let choice: string | undefined;
+            do {
+              choice = await vscode.window.showWarningMessage(
+                `SentinelAI: Policy violation in edit to ${input.filePath}`,
+                { modal: true, detail: `${violationDetail}\n\nProceed anyway?` },
+                "Yes",
+                "No",
+              );
+            } while (choice === undefined);
+
+            if (choice !== "Yes") {
+              const violationList = editCheck.violations
+                .map((v) => `- **${v.subject}**: ${v.reason}\n  Policy: ${v.policy_excerpt}`)
+                .join("\n\n");
+              stream.markdown(
+                `\n**SentinelAI blocked edit to \`${input.filePath}\`**\n\nThe following policy violations were detected in the generated code:\n\n${violationList}`
+              );
+              postIntentResult(id, editTrace, "rejected", editCheck.violations).catch(() => {});
+              blocked = true;
+              break;
+            }
+
+            postIntentResult(id, editTrace, "accepted", editCheck.violations).catch(() => {});
+          }
+
           stream.progress(`Applying edit to ${input.filePath}…`);
           await applyFileEdit(workspaceRoot, input.filePath, input.newContent);
           stream.markdown(`\n*Applied edit to \`${input.filePath}\`*`);
@@ -241,7 +226,7 @@ export async function handleRequest(
       }
     }
 
-    if (!hasToolCalls) {
+    if (!hasToolCalls || blocked) {
       break;
     }
 
