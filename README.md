@@ -6,7 +6,12 @@ Sentinel AI is a runtime observability and interception layer for AI coding assi
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688?logo=fastapi&logoColor=fff)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5+-3178C6?logo=typescript&logoColor=fff)
 ![Solana](https://img.shields.io/badge/Solana-Devnet-9945FF?logo=solana&logoColor=fff)
+![MLH](https://img.shields.io/badge/MLH-Hackathon-blue?logo=mlh)
+![Winner](https://img.shields.io/badge/Status-Winner-gold?style=flat&logo=trophy)
 
+## UPDATE:
+ - 1st Place Track Winner at SolHacks 2026
+ - MLH Best Use of Solana Winner
 ---
 
 ## Project Link
