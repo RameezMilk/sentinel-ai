@@ -14,6 +14,11 @@ https://sentinel-ai-sol.vercel.app/
 
 ---
 
+## DevPost Link
+https://devpost.com/software/sentinel-ai-sj0daq
+
+---
+
 ## 🏗 Project Structure
 
 ```
